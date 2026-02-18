@@ -15,7 +15,6 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-//automatic create table if not available
 const createTable = async () => {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS tasks (
