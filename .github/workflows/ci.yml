@@ -40,4 +40,4 @@ jobs:
 
     steps:
       - name: Trigger Render Deploy
-        run: echo "Render will auto-pull the new tagged image"
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
