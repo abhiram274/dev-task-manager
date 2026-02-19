@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+    tags:
+      - "v*"
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,11 +24,20 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and Push Docker Image
+      - name: Build and Push Image
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/devtask-backend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/devtask-backend:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/devtask-backend:latest
+
+  deploy:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Render Deploy
+        run: echo "Render will auto-pull the new tagged image"
