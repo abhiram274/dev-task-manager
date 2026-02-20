@@ -8,10 +8,8 @@ type Task = {
   completed?: boolean
 }
 
-export default function Home() {
+export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([])
-  const [title, setTitle] = useState("")
-
   const API = process.env.NEXT_PUBLIC_API_URL
 
   useEffect(() => {
@@ -21,32 +19,26 @@ export default function Home() {
       .catch(err => console.error("Error fetching tasks:", err))
   }, [API])
 
-  const addTask = async () => {
-    const res = await fetch(`${API}/tasks`, {
-      method: "POST",
+  const toggleTask = async (id: number, completed: boolean) => {
+    const res = await fetch(`${API}/tasks/${id}`, {
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title })
+      body: JSON.stringify({ completed: !completed })
     })
-    const data = await res.json()
-    setTasks([...tasks, data])
-    setTitle("")
+    const updated = await res.json()
+    setTasks(tasks.map(t => t.id === id ? updated : t))
   }
 
   return (
     <div style={{ padding: 40 }}>
-      <h1>DevTask Manager</h1>
-
-      <input 
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Enter task"
-      />
-      <button onClick={addTask}>Add</button>
-
+      <h1>All Tasks</h1>
       <ul>
         {tasks.map(task => (
           <li key={task.id}>
-            {task.title} {task.completed ? "✅" : "❌"}
+            {task.title}{" "}
+            <button onClick={() => toggleTask(task.id, task.completed ?? false)}>
+              {task.completed ? "Mark Incomplete" : "Mark Complete"}
+            </button>
           </li>
         ))}
       </ul>
