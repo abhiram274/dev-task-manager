@@ -6,6 +6,7 @@ type Task = { id: number; title: string; completed?: boolean }
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([])
+  const [title, setTitle] = useState("")
   const API = process.env.NEXT_PUBLIC_API_URL
 
   useEffect(() => {
@@ -14,6 +15,18 @@ export default function TasksPage() {
       .then(data => setTasks(data))
       .catch(err => console.error("Error fetching tasks:", err))
   }, [API])
+
+  const addTask = async () => {
+    if (!title.trim()) return
+    const res = await fetch(`${API}/tasks`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title })
+    })
+    const data = await res.json()
+    setTasks([...tasks, data])
+    setTitle("")
+  }
 
   const toggleTask = async (id: number, completed: boolean) => {
     const res = await fetch(`${API}/tasks/${id}`, {
@@ -32,8 +45,25 @@ export default function TasksPage() {
 
   return (
     <div className="max-w-lg mx-auto bg-white shadow-lg rounded-lg p-6">
-      <h1 className="text-2xl font-bold text-green-600 mb-4">All Tasks</h1>
+      <h1 className="text-2xl font-bold text-green-600 mb-6">All Tasks</h1>
 
+      {/* Add Task Form */}
+      <div className="flex gap-2 mb-6">
+        <input 
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter new task"
+          className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-400"
+        />
+        <button 
+          onClick={addTask}
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+        >
+          Add
+        </button>
+      </div>
+
+      {/* Task List */}
       <ul className="space-y-3">
         {tasks.map(task => (
           <li 
