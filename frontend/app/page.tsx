@@ -2,15 +2,10 @@
 
 import { useEffect, useState } from 'react'
 
-type Task = {
-  id: number
-  title: string
-  completed?: boolean
-}
+type Task = { id: number; title: string; completed?: boolean }
 
-export default function Home() {
+export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([])
-  const [title, setTitle] = useState("")
   const API = process.env.NEXT_PUBLIC_API_URL
 
   useEffect(() => {
@@ -20,45 +15,32 @@ export default function Home() {
       .catch(err => console.error("Error fetching tasks:", err))
   }, [API])
 
-  const addTask = async () => {
-    if (!title.trim()) return
-    const res = await fetch(`${API}/tasks`, {
-      method: "POST",
+  const toggleTask = async (id: number, completed: boolean) => {
+    const res = await fetch(`${API}/tasks/${id}`, {
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title })
+      body: JSON.stringify({ completed: !completed })
     })
-    const data = await res.json()
-    setTasks([...tasks, data])
-    setTitle("")
+    const updated = await res.json()
+    setTasks(tasks.map(t => t.id === id ? updated : t))
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center py-12">
-      <h1 className="text-3xl font-bold mb-6 text-blue-600">DevTask Manager</h1>
+    <div className="max-w-lg mx-auto bg-white shadow-lg rounded-lg p-6">
+      <h1 className="text-2xl font-bold text-green-600 mb-4">All Tasks</h1>
 
-      <div className="flex gap-2 mb-6">
-        <input 
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter task"
-          className="border rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-        <button 
-          onClick={addTask}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-        >
-          Add
-        </button>
-      </div>
-
-      <ul className="bg-white shadow-md rounded p-4 w-80">
+      <ul className="divide-y divide-gray-200">
         {tasks.map(task => (
-          <li 
-            key={task.id} 
-            className="flex justify-between items-center border-b py-2 last:border-b-0"
-          >
-            <span>{task.title}</span>
-            <span>{task.completed ? "✅" : "❌"}</span>
+          <li key={task.id} className="flex justify-between items-center py-2">
+            <span className={task.completed ? "line-through text-gray-500" : ""}>
+              {task.title}
+            </span>
+            <button 
+              onClick={() => toggleTask(task.id, task.completed ?? false)}
+              className="text-sm px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600 transition"
+            >
+              {task.completed ? "Undo" : "Complete"}
+            </button>
           </li>
         ))}
       </ul>

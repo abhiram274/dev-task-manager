@@ -2,11 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-type Task = {
-  id: number
-  title: string
-  completed?: boolean
-}
+type Task = { id: number; title: string; completed?: boolean }
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([])
@@ -29,25 +25,35 @@ export default function TasksPage() {
     setTasks(tasks.map(t => t.id === id ? updated : t))
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-12">
-      <h1 className="text-3xl font-bold mb-6 text-green-600">All Tasks</h1>
+  const deleteTask = async (id: number) => {
+    await fetch(`${API}/tasks/${id}`, { method: "DELETE" })
+    setTasks(tasks.filter(t => t.id !== id))
+  }
 
-      <ul className="bg-white shadow-lg rounded p-6 w-96">
+  return (
+    <div className="max-w-lg mx-auto bg-white shadow-lg rounded-lg p-6">
+      <h1 className="text-2xl font-bold text-green-600 mb-4">All Tasks</h1>
+
+      <ul className="divide-y divide-gray-200">
         {tasks.map(task => (
-          <li 
-            key={task.id} 
-            className="flex justify-between items-center border-b py-2 last:border-b-0"
-          >
+          <li key={task.id} className="flex justify-between items-center py-2">
             <span className={task.completed ? "line-through text-gray-500" : ""}>
               {task.title}
             </span>
-            <button 
-              onClick={() => toggleTask(task.id, task.completed ?? false)}
-              className="text-sm px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600 transition"
-            >
-              {task.completed ? "Undo" : "Complete"}
-            </button>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => toggleTask(task.id, task.completed ?? false)}
+                className="text-sm px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 transition"
+              >
+                {task.completed ? "Undo" : "Complete"}
+              </button>
+              <button 
+                onClick={() => deleteTask(task.id)}
+                className="text-sm px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 transition"
+              >
+                Delete
+              </button>
+            </div>
           </li>
         ))}
       </ul>

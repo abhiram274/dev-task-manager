@@ -47,6 +47,23 @@ app.post("/tasks", async (req, res) => {
   res.json(result.rows[0]);
 });
 
+
+app.delete("/tasks/:id", async (req, res) => {
+  const { id } = req.params
+  await pool.query("DELETE FROM tasks WHERE id = $1", [id])
+  res.json({ success: true })
+})
+
+app.patch("/tasks/:id", async (req, res) => {
+  const { id } = req.params
+  const { completed } = req.body
+  const result = await pool.query(
+    "UPDATE tasks SET completed = $1 WHERE id = $2 RETURNING *",
+    [completed, id]
+  )
+  res.json(result.rows[0])
+})
+
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
 });
