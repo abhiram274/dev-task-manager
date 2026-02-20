@@ -30,14 +30,23 @@ export default function TasksPage() {
   }
 
   return (
-    <div style={{ padding: 40 }}>
-      <h1>All Tasks</h1>
-      <ul>
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-12">
+      <h1 className="text-3xl font-bold mb-6 text-green-600">All Tasks</h1>
+
+      <ul className="bg-white shadow-lg rounded p-6 w-96">
         {tasks.map(task => (
-          <li key={task.id}>
-            {task.title}{" "}
-            <button onClick={() => toggleTask(task.id, task.completed ?? false)}>
-              {task.completed ? "Mark Incomplete" : "Mark Complete"}
+          <li 
+            key={task.id} 
+            className="flex justify-between items-center border-b py-2 last:border-b-0"
+          >
+            <span className={task.completed ? "line-through text-gray-500" : ""}>
+              {task.title}
+            </span>
+            <button 
+              onClick={() => toggleTask(task.id, task.completed ?? false)}
+              className="text-sm px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600 transition"
+            >
+              {task.completed ? "Undo" : "Complete"}
             </button>
           </li>
         ))}
